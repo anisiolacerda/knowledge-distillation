@@ -110,7 +110,6 @@ class WB_MultiDomainLoaderTripleFD(torch.utils.data.Dataset):
             'test': 2
         }
 
-
         self.augment_transform = transforms.Compose([
             # transforms.Resize((224,224)),
             transforms.RandomResizedCrop(224, scale=(0.7, 1.0)),

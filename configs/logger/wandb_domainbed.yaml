@@ -1,0 +1,18 @@
+# sweep.yaml
+name: eval_first_round_baselines
+program: domainbed/scripts/train.py
+method: grid
+project: causal_knowledge_distillation
+entity: first-round-baselines
+parameters:
+  data_dir:
+    value: '/srv/anisio/knowledge-distillation/data/MNIST/'
+  algorithm:
+    values:
+    - 'ERM'
+    - 'RSC'
+    - 'IRM'
+  dataset:
+    value: 'ColoredMNIST'
+  test_env:
+    value: 2

@@ -13,7 +13,7 @@ from torchvision.utils import save_image
 from torch.utils.data import DataLoader
 import random
 
-mnist = datasets.MNIST('~/datasets/mnist', train=True, download=False)
+mnist = datasets.MNIST('/srv/anisio/knowledge-distillation/data/MNIST/', train=True, download=False)
 mnist_train = (mnist.data[:50000], mnist.targets[:50000])
 mnist_val = (mnist.data[50000:], mnist.targets[50000:])
 
@@ -571,7 +571,7 @@ fname = 'cvpr_cmnist_s{}_z{}_fdc_l_{}'.format(stride, z_hidden, z_middle_fc)
 import os
 
 
-eval_only=False
+eval_only=True
 if not eval_only:
     for epoch in range(1, epochs + 1):
         print("")
@@ -601,7 +601,7 @@ if not eval_only:
 
 else:
     print('start loading')
-    checkpoint = torch.load('cvpr_cmnist_s8_z32_fdc_l_256_model_best_508.pth')
+    checkpoint = torch.load('/srv/anisio/knowledge-distillation/src/third_party/CT4Recognition-master/cvpr_cmnist_s8_z32_fdc_l_256_model_best_508.pth')
     model.load_state_dict(checkpoint['VAE'])
     classifier.load_state_dict(checkpoint['FDClassifer'])
 

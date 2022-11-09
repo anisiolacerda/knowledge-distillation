@@ -1,0 +1,18 @@
+wandb_version: 1
+
+alpha:
+  value: 1
+beta:
+  value: 1000
+dataset:
+  value: cifar100
+distill:
+  value: hint
+epochs:
+  value: 25
+model_s:
+  value: vgg8
+path_t:
+  value: /srv/anisio/knowledge-distillation/data/save/models/ResNet50_vanilla/ckpt_epoch_240.pth
+trial:
+  value: 1

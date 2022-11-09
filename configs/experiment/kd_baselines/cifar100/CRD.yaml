@@ -1,0 +1,35 @@
+# @package _global_
+
+# to execute this experiment run:
+# python train.py experiment=kd_mnist
+
+defaults:
+  - override /datamodule: cifar100.yaml
+  - override /model: litkd.yaml
+  - override /callbacks: default.yaml
+  - override /trainer: cifar100_gpu.yaml
+
+# all parameters below will be merged with parameters from default configurations set above
+# this allows you to overwrite only specified parameters
+
+tags: ["cifar100", "crd"]
+
+seed: 12345
+
+model:
+  model_s_name: 'resnet8x4'
+  model_t_path: './data/save/models/resnet32x4_vanilla/ckpt_epoch_240.pth'
+  n_cls: 100
+  kd_T: 4
+  gamma: 1
+  alpha: 0
+  beta: 0.8
+  distill: 'crd'
+
+logger:
+  wandb:
+    _target_: pytorch_lightning.loggers.wandb.WandbLogger
+    project: "causal_knowledge_distillation"
+    name: eval_first_round_baselines
+    tags: ${tags}
+    group: "cifar100"

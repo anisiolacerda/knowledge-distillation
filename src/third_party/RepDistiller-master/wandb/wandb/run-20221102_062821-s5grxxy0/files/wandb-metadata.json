@@ -1,0 +1,33 @@
+{
+    "os": "Linux-4.15.0-189-generic-x86_64-with-glibc2.27",
+    "python": "3.9.13",
+    "heartbeatAt": "2022-11-02T09:28:21.977700",
+    "startedAt": "2022-11-02T09:28:21.300111",
+    "docker": null,
+    "gpu": "NVIDIA TITAN V",
+    "gpu_count": 1,
+    "cpu_count": 16,
+    "cuda": "10.1.105",
+    "args": [
+        "--alpha=1",
+        "--beta=1",
+        "--dataset=cifar100",
+        "--distill=hint",
+        "--epochs=25",
+        "--model_s=vgg8",
+        "--path_t=/srv/anisio/knowledge-distillation/data/save/models/resnet32x4_vanilla/ckpt_epoch_240.pth",
+        "--trial=1"
+    ],
+    "state": "running",
+    "program": "/srv/anisio/knowledge-distillation/src/third_party/RepDistiller-master/train_student.py",
+    "codePath": "src/third_party/RepDistiller-master/train_student.py",
+    "git": {
+        "remote": "https://github.com/anisiolacerda/knowledge-distillation.git",
+        "commit": "e267516d6dbe74b2924a7ea3788c28a9c012f622"
+    },
+    "email": "",
+    "root": "/srv/anisio/knowledge-distillation",
+    "host": "titan-02",
+    "username": "anisio",
+    "executable": "/srv/anisio/anaconda3/envs/myenv/bin/python"
+}

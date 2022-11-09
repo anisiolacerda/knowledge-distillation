@@ -1,0 +1,55 @@
+# sweep.yaml
+name: eval_first_round_kd_baselines
+program: train_student.py
+method: grid
+project: knowledge_distillation
+entity: first-round-baselines
+parameters:
+  path_t:
+    values: 
+    - '/srv/anisio/knowledge-distillation/data/save/models/resnet32x4_vanilla/ckpt_epoch_240.pth'
+    - '/srv/anisio/knowledge-distillation/data/save/models/ResNet50_vanilla/ckpt_epoch_240.pth'
+  model_s:
+    values: 
+      - 'resnet8x4'
+      - 'vgg8'
+  dataset:
+    value: 'cifar100'
+  alpha:
+    values:
+    # - 0
+    - 1
+  beta:
+    values: 
+    - 0
+    # - 0.02
+    # - 0.8
+    - 1
+    # - 50
+    - 100
+    # - 200
+    - 1000
+    # - 3000
+    # - 30000
+  trial: 
+    value: 1
+  distill:
+    values:
+    - 'kd'
+    - 'hint'
+    - 'attention'
+    - 'similarity'
+    - 'correlation'
+    - 'vid'
+    - 'rkd'
+    - 'pkt'
+    - 'abound'
+    - 'factor'
+    - 'fsp'
+    - 'nst'
+    - 'crd'
+  epochs:
+    value: 25
+metric:
+  goal: maximize
+  name: validation_acc

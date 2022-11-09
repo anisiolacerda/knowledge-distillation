@@ -1,0 +1,1 @@
+{"train_acc": 1.0, "train_loss": NaN, "test_acc": 1.0, "test_loss": NaN, "test_acc_top5": 5.0, "_timestamp": 1667419097.5734553, "_runtime": 1009.1718182563782, "_step": 24, "_wandb": {"runtime": 1008}}

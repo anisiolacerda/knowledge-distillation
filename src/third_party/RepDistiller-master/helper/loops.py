@@ -96,14 +96,15 @@ def train_distill(epoch, train_loader, module_list, criterion_list, optimizer, o
         if opt.distill in ['crd']:
             input, target, index, contrast_idx = data
         else:
-            input, target, index = data
+            input, target = data
         data_time.update(time.time() - end)
 
         input = input.float()
         if torch.cuda.is_available():
             input = input.cuda()
             target = target.cuda()
-            index = index.cuda()
+            if opt.distill in ['crd']:
+                index = index.cuda()
             if opt.distill in ['crd']:
                 contrast_idx = contrast_idx.cuda()
 

@@ -88,7 +88,7 @@ def get_args():
     if 'cv' in socket.gethostname():
         parser.add_argument('--save_root_path', default='./', type=str)
     else:
-        parser.add_argument('--save_root_path', default='/local/rcs/mcz/2021Spring/FrontDoor/', type=str)
+        parser.add_argument('--save_root_path', default='/srv/anisio/knowledge-distillation/data/FrontDoor/', type=str)
     return parser.parse_args()
 
 def main():
@@ -122,7 +122,7 @@ def main():
 
     from dataloader.waterbird_loader import WB_DomainTest, WB_RandomData, WB_MultiDomainLoaderTripleFD
 
-    root_path = "/proj/vondrick2/datasets/ImageNet-OOD/waterbird_complete95_forest2water2"
+    root_path = "/srv/anisio/knowledge-distillation/data/waterbird_complete95_forest2water2"
     if socket.gethostname()=='cv02':
         root_path = "/local/vondrick/cz/waterbird_complete95_forest2water2"
     elif socket.gethostname() == 'cv08':
@@ -169,8 +169,9 @@ def main():
         num_workers=args.workers*2, pin_memory=True, sampler=train_sampler)
 
     from models.resnet import resnet50, FDC5
+
     resnet = resnet50()
-    checkpoint = torch.load('./resnet50.pth')
+    checkpoint = torch.load('/srv/anisio/knowledge-distillation/data/models/resnet50.pth')
     resnet.load_state_dict(checkpoint)
 
     resnet = nn.DataParallel(resnet).cuda()
@@ -352,7 +353,7 @@ def main():
         checkpoint = torch.load(os.path.join(args.fname, f'model_best.pth'))
 
     else:
-        checkpoint = torch.load('waterbird_model_checkpoint_78.pth')  # one random run
+        checkpoint = torch.load('/srv/anisio/knowledge-distillation/data/models/waterbird_model_checkpoint_78.pth')  # one random run
         
     # checkpoint = torch.load('./resnet50.pth')
     resnet.load_state_dict(checkpoint['state_dict_resnet'])

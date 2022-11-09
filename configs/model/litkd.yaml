@@ -1,0 +1,14 @@
+_target_: src.models.litkd_student_module.LitKDStudentModule
+
+optimizer:
+  _target_: torch.optim.SGD
+  _partial_: true
+  lr: 0.05
+  momentum: 0.9
+  weight_decay: 0.1
+
+scheduler:
+  _target_: torch.optim.lr_scheduler.MultiStepLR
+  _partial_: true
+  milestones: [150,180,210]
+  gamma: 0.1

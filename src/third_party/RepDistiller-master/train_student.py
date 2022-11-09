@@ -9,18 +9,20 @@ import argparse
 import socket
 import time
 
-import tensorboard_logger as tb_logger
+# import tensorboard_logger as tb_logger
 import torch
 import torch.optim as optim
 import torch.nn as nn
 import torch.backends.cudnn as cudnn
 
+import wandb
 
 from models import model_dict
 from models.util import Embed, ConvReg, LinearEmbed
 from models.util import Connector, Translator, Paraphraser
 
 from dataset.cifar100 import get_cifar100_dataloaders, get_cifar100_dataloaders_sample
+from dataset.waterbird import get_waterbird_dataloaders, get_waterbird_dataloaders_sample
 
 from helper.util import adjust_learning_rate
 
@@ -141,12 +143,25 @@ def load_teacher(model_path, n_cls):
 
 
 def main():
-    best_acc = 0
-
     opt = parse_option()
 
+    wandb_args = dict(
+      project='knowledge_distillation',
+      entity='kd-baselines',
+      dir='./wandb',
+      reinit=True,
+    #   name='exp_name',
+      group='exp_group'
+      )
+    wandb_run = wandb.init(**wandb_args)
+    # wandb.config.update(opt.FLAGS, allow_val_change=True)
+
+    best_acc = 0
+
+    
+
     # tensorboard logger
-    logger = tb_logger.Logger(logdir=opt.tb_folder, flush_secs=2)
+    # logger = tb_logger.Logger(logdir=opt.tb_folder, flush_secs=2)
 
     # dataloader
     if opt.dataset == 'cifar100':
@@ -156,10 +171,17 @@ def main():
                                                                                k=opt.nce_k,
                                                                                mode=opt.mode)
         else:
-            train_loader, val_loader, n_data = get_cifar100_dataloaders(batch_size=opt.batch_size,
+            train_loader, val_loader = get_cifar100_dataloaders(batch_size=opt.batch_size,
                                                                         num_workers=opt.num_workers,
-                                                                        is_instance=True)
+                                                                        is_instance=False)
         n_cls = 100
+    elif opt.dataset == 'waterbird':
+        if opt.distill in ['crd']:
+            train_loader, val_loader, n_data = get_waterbird_dataloaders_sample()
+        else:
+            train_loader, val_loader = get_waterbird_dataloaders(batch_size=opt.batch_size,
+                                                                 num_workers=opt.num_workers,
+                                                                 is_instance=False)
     else:
         raise NotImplementedError(opt.dataset)
 
@@ -233,7 +255,7 @@ def main():
         init_trainable_list.append(connector)
         init_trainable_list.append(model_s.get_feat_modules())
         criterion_kd = ABLoss(len(feat_s[1:-1]))
-        init(model_s, model_t, init_trainable_list, criterion_kd, train_loader, logger, opt)
+        init(model_s, model_t, init_trainable_list, criterion_kd, train_loader, None, opt)
         # classification
         module_list.append(connector)
     elif opt.distill == 'factor':
@@ -245,7 +267,7 @@ def main():
         init_trainable_list = nn.ModuleList([])
         init_trainable_list.append(paraphraser)
         criterion_init = nn.MSELoss()
-        init(model_s, model_t, init_trainable_list, criterion_init, train_loader, logger, opt)
+        init(model_s, model_t, init_trainable_list, criterion_init, train_loader, None, opt)
         # classification
         criterion_kd = FactorTransfer()
         module_list.append(translator)
@@ -258,7 +280,7 @@ def main():
         # init stage training
         init_trainable_list = nn.ModuleList([])
         init_trainable_list.append(model_s.get_feat_modules())
-        init(model_s, model_t, init_trainable_list, criterion_kd, train_loader, logger, opt)
+        init(model_s, model_t, init_trainable_list, criterion_kd, train_loader, None, opt)
         # classification training
         pass
     else:
@@ -298,14 +320,20 @@ def main():
         time2 = time.time()
         print('epoch {}, total time {:.2f}'.format(epoch, time2 - time1))
 
-        logger.log_value('train_acc', train_acc, epoch)
-        logger.log_value('train_loss', train_loss, epoch)
+        # logger.log_value('train_acc', train_acc, epoch)
+        # logger.log_value('train_loss', train_loss, epoch)
 
-        test_acc, tect_acc_top5, test_loss = validate(val_loader, model_s, criterion_cls, opt)
+        test_acc, test_acc_top5, test_loss = validate(val_loader, model_s, criterion_cls, opt)
 
-        logger.log_value('test_acc', test_acc, epoch)
-        logger.log_value('test_loss', test_loss, epoch)
-        logger.log_value('test_acc_top5', tect_acc_top5, epoch)
+        # logger.log_value('test_acc', test_acc, epoch)
+        # logger.log_value('test_loss', test_loss, epoch)
+        # logger.log_value('test_acc_top5', test_acc_top5, epoch)
+
+        wandb.log({'train_acc': train_acc, 
+                   'train_loss': train_loss,
+                   'test_acc': test_acc,
+                   'test_loss': test_loss,
+                   'test_acc_top5': test_acc_top5})
 
         # save the best model
         if test_acc > best_acc:
@@ -342,6 +370,9 @@ def main():
     save_file = os.path.join(opt.save_folder, '{}_last.pth'.format(opt.model_s))
     torch.save(state, save_file)
 
+    wandb_run.finish()
+
 
 if __name__ == '__main__':
     main()
+    
