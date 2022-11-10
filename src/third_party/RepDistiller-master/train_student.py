@@ -22,7 +22,8 @@ from models.util import Embed, ConvReg, LinearEmbed
 from models.util import Connector, Translator, Paraphraser
 
 from dataset.cifar100 import get_cifar100_dataloaders, get_cifar100_dataloaders_sample
-from dataset.waterbird import get_waterbird_dataloaders, get_waterbird_dataloaders_sample
+from dataset.waterbird import get_waterbird_dataloaders 
+#, get_waterbird_dataloaders_sample
 
 from helper.util import adjust_learning_rate
 
@@ -147,7 +148,7 @@ def main():
 
     wandb_args = dict(
       project='knowledge_distillation',
-      entity='kd-baselines',
+    #   entity='kd-baselines',
       dir='./wandb',
       reinit=True,
     #   name='exp_name',
@@ -175,13 +176,13 @@ def main():
                                                                         num_workers=opt.num_workers,
                                                                         is_instance=False)
         n_cls = 100
-    elif opt.dataset == 'waterbird':
-        if opt.distill in ['crd']:
-            train_loader, val_loader, n_data = get_waterbird_dataloaders_sample()
-        else:
-            train_loader, val_loader = get_waterbird_dataloaders(batch_size=opt.batch_size,
-                                                                 num_workers=opt.num_workers,
-                                                                 is_instance=False)
+    # elif opt.dataset == 'waterbird':
+    #     if opt.distill in ['crd']:
+    #         train_loader, val_loader, n_data = get_waterbird_dataloaders_sample()
+    #     else:
+    #         train_loader, val_loader = get_waterbird_dataloaders(batch_size=opt.batch_size,
+    #                                                              num_workers=opt.num_workers,
+    #                                                              is_instance=False)
     else:
         raise NotImplementedError(opt.dataset)
 

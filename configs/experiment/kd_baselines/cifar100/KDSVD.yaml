@@ -12,18 +12,9 @@ defaults:
 # all parameters below will be merged with parameters from default configurations set above
 # this allows you to overwrite only specified parameters
 
-tags: ["cifar100", "crd"]
+tags: ["cifar100", "kdsvd"]
 
 seed: 12345
-
-global_nce_k: 16384
-
-datamodule:
-  distill: 'crd'
-  mode: 'exact'
-  nce_k: ${global_nce_k}
-  is_sample: true
-  percent: 1.0
 
 model:
   model_s_name: 'resnet8x4'
@@ -32,13 +23,8 @@ model:
   kd_T: 4
   gamma: 1
   alpha: 0
-  beta: 0.8
-  distill: 'crd'
-  feat_dim: 128
-  nce_k: ${global_nce_k}
-  nce_t: 0.07
-  nce_m: 0.5
-  n_data: 50000
+  beta: 1
+  distill: 'kdsvd'
 
 logger:
   wandb:

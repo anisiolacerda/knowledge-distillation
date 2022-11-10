@@ -25,6 +25,7 @@ model:
   alpha: 0
   beta: 0.02
   distill: 'correlation'
+  feat_dim: 128
 
 logger:
   wandb:

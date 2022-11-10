@@ -1,6 +1,11 @@
 _target_: src.datamodules.cifar100_datamodule.CIFAR100DataModule
 data_dir: ${paths.data_dir}
 batch_size: 64
-train_val_split: [35000, 15000]
-num_workers: 0
+train_val_split: [40000, 10000]
+num_workers: 8
 pin_memory: False
+distill: None
+mode: None
+nce_k: None
+is_sample: None
+percent: None

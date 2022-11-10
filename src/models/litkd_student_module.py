@@ -43,6 +43,7 @@ class LitKDStudentModule(LightningModule):
     """
 
     def __init__(
+        #TODO(anisio) : descrive parameters
         self,
         model_t_path: str,
         model_s_name: str,
@@ -52,6 +53,16 @@ class LitKDStudentModule(LightningModule):
         alpha: float,
         beta: float,
         distill: str,
+        #Specific (e.g. CC, CRD) parameters
+        t_dim: int = None,
+        s_dim: int = None,
+        feat_dim: int = None,
+        nce_k: int = None,
+
+        nce_t: float = None,
+        nce_m: float = None,
+        n_data: int = None,
+        
         hint_layer: float = 2,
         optimizer: torch.optim.Optimizer = None,
         scheduler: torch.optim.lr_scheduler = None,
@@ -83,6 +94,13 @@ class LitKDStudentModule(LightningModule):
         self.model_t_path = model_t_path
         self.model_t = self.load_teacher()
         self.model_s = model_dict[model_s_name](num_classes=self.n_cls)
+
+
+        # self.t_dim = t_dim
+        # self.s_dim = s_dim
+        # self.feat_dim = feat_dim
+        # self.nce_k = nce_k
+        # self.nce_m = nce_m
 
         # loss function
         self.criterion_cls = torch.nn.CrossEntropyLoss()
@@ -119,13 +137,12 @@ class LitKDStudentModule(LightningModule):
             self.regress_s = ConvReg(feat_s[self.hint_layer].shape, feat_t[self.hint_layer].shape)
             # module_list.append(regress_s)
             # self.trainable_list.append(regress_s)
-        # elif self.distill == 'crd':
-        #     feat_s, feat_t = self.get_rand_feat_s_t()
-        #     self.s_dim = feat_s[-1].shape[1]
-        #     self.t_dim = feat_t[-1].shape[1]
-        #     # self.n_data = n_data
-        #     self.n_data = self.hparams.train_val_split[0]
-        #     criterion_kd = CRDLoss(opt)
+        elif self.distill == 'crd':
+            feat_s, feat_t = self.get_rand_feat_s_t()
+            self.hparams.s_dim = feat_s[-1].shape[1]
+            self.hparams.t_dim = feat_t[-1].shape[1]
+            # self.hparams.n_data = self.n_data
+            criterion_kd = CRDLoss(self.hparams)
         #     module_list.append(criterion_kd.embed_s)
         #     module_list.append(criterion_kd.embed_t)
         #     trainable_list.append(criterion_kd.embed_s)
@@ -143,6 +160,7 @@ class LitKDStudentModule(LightningModule):
         elif self.distill == 'kdsvd':
             criterion_kd = KDSVD()
         elif self.distill == 'correlation':
+            feat_s, feat_t = self.get_rand_feat_s_t()
             criterion_kd = Correlation()
             self.embed_s = LinearEmbed(feat_s[-1].shape[1], self.feat_dim)
             self.embed_t = LinearEmbed(feat_t[-1].shape[1], self.feat_dim)
@@ -166,11 +184,11 @@ class LitKDStudentModule(LightningModule):
         #     # init stage training
         #     init_trainable_list = torch.nn.ModuleList([])
         #     init_trainable_list.append(connector)
-        #     init_trainable_list.append(model_s.get_feat_modules())
+        #     init_trainable_list.append(self.model_s.get_feat_modules())
         #     criterion_kd = ABLoss(len(feat_s[1:-1]))
         #     init(model_s, model_t, init_trainable_list, criterion_kd, train_loader, None, opt)
-        #     # classification
-        #     module_list.append(connector)
+            # # classification
+            # module_list.append(connector)
         # elif self.distill == 'factor':
         #     s_shape = feat_s[-2].shape
         #     t_shape = feat_t[-2].shape
@@ -201,7 +219,7 @@ class LitKDStudentModule(LightningModule):
 
         return criterion_kd
 
-    def get_loss_kd_value(self, feat_t, feat_s):
+    def get_loss_kd_value(self, feat_t, feat_s, index=None, contrast_idx=None):
         if self.distill == 'kd':
             loss_kd = 0
         elif self.distill == 'hint':
@@ -209,10 +227,10 @@ class LitKDStudentModule(LightningModule):
             f_s = self.regress_s(feat_s[self.hint_layer])
             f_t = feat_t[self.hint_layer]
             loss_kd = self.criterion_kd(f_s, f_t)
-        # elif self.distill == 'crd':
-        #     f_s = feat_s[-1]
-        #     f_t = feat_t[-1]
-        #     loss_kd = self.criterion_kd(f_s, f_t, index, contrast_idx)
+        elif self.distill == 'crd':
+            f_s = feat_s[-1]
+            f_t = feat_t[-1]
+            loss_kd = self.criterion_kd(f_s, f_t, index, contrast_idx)
         elif self.distill == 'attention':
             g_s = feat_s[1:-1]
             g_t = feat_t[1:-1]
@@ -288,7 +306,12 @@ class LitKDStudentModule(LightningModule):
         self.val_acc_best.reset()
 
     def step(self, batch: Any):
-        x, y = batch
+        index = None
+        contrast_idx = None
+        if self.hparams.distill == 'crd':
+            x, y, index, contrast_idx = batch
+        else:
+            x, y = batch
 
         preact = False
         if self.distill in ['abound']:
@@ -299,7 +322,7 @@ class LitKDStudentModule(LightningModule):
 
         loss_cls = self.criterion_cls(logit_s, y) 
         loss_div = self.criterion_div(logit_s, logit_t)
-        loss_kd = self.get_loss_kd_value(feat_t, feat_s)
+        loss_kd = self.get_loss_kd_value(feat_t, feat_s, index, contrast_idx)
 
         loss = (self.gamma * loss_cls) + (self.alpha * loss_div) + (self.beta * loss_kd)
 

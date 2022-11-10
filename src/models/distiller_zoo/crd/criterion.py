@@ -4,7 +4,6 @@ from .memory import ContrastMemory
 
 eps = 1e-7
 
-
 class CRDLoss(nn.Module):
     """CRD Loss function
     includes two symmetric parts:
