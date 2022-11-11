@@ -29,7 +29,7 @@ model:
 logger:
   wandb:
     _target_: pytorch_lightning.loggers.wandb.WandbLogger
-    project: "causal_knowledge_distillation"
+    project: "knowledge_distillation"
     name: eval_first_round_baselines
     tags: ${tags}
     group: "cifar100"

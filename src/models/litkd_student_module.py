@@ -3,8 +3,10 @@ from typing import Any, List
 import torch
 import torch.nn.functional as F
 from pytorch_lightning import LightningModule
-from torchmetrics import MaxMetric, MeanMetric
+from torchmetrics import MaxMetric, MeanMetric, MetricCollection
 from torchmetrics.classification.accuracy import Accuracy
+from torchmetrics import Precision, Recall, AUC, F1Score, CohenKappa, ConfusionMatrix
+
 
 from models.components import model_dict
 from models.components.util import Embed, ConvReg, LinearEmbed
@@ -13,7 +15,6 @@ from models.components.util import Connector, Translator, Paraphraser
 from .distiller_zoo import DistillKL, HintLoss, Attention, Similarity, Correlation, VIDLoss, RKDLoss
 from .distiller_zoo import PKT, ABLoss, FactorTransfer, KDSVD, FSP, NSTLoss
 from .distiller_zoo.crd.criterion import CRDLoss
-
 
 class DistillKL(torch.nn.Module):
     """Distilling the Knowledge in a Neural Network"""
@@ -95,22 +96,35 @@ class LitKDStudentModule(LightningModule):
         self.model_t = self.load_teacher()
         self.model_s = model_dict[model_s_name](num_classes=self.n_cls)
 
-
-        # self.t_dim = t_dim
-        # self.s_dim = s_dim
-        # self.feat_dim = feat_dim
-        # self.nce_k = nce_k
-        # self.nce_m = nce_m
-
         # loss function
         self.criterion_cls = torch.nn.CrossEntropyLoss()
         self.criterion_div = DistillKL(self.kd_T)
         self.criterion_kd = self.get_criterion_kd()
 
-        # metric objects for calculating and averaging accuracy across batches
-        self.train_acc = Accuracy()
-        self.val_acc = Accuracy()
-        self.test_acc = Accuracy()
+        # # metric objects for calculating and averaging accuracy across batches
+        self.metrics_train = MetricCollection({
+            'acc': Accuracy(),
+            'preccision': Precision(num_classes=self.n_cls, average='macro'),
+            'recall': Recall(num_classes=self.n_cls, average='macro'),
+            'F1Score': F1Score(num_classes=self.n_cls),
+            'CohenKappa': CohenKappa(num_classes=self.n_cls),
+        },)
+
+        self.metrics_val = MetricCollection({
+            'acc': Accuracy(),
+            'preccision': Precision(num_classes=self.n_cls, average='macro'),
+            'recall': Recall(num_classes=self.n_cls, average='macro'),
+            'F1Score': F1Score(num_classes=self.n_cls),
+            'CohenKappa': CohenKappa(num_classes=self.n_cls),
+        },)
+
+        self.metrics_test = MetricCollection({
+            'acc': Accuracy(),
+            'preccision': Precision(num_classes=self.n_cls, average='macro'),
+            'recall': Recall(num_classes=self.n_cls, average='macro'),
+            'F1Score': F1Score(num_classes=self.n_cls),
+            'CohenKappa': CohenKappa(num_classes=self.n_cls),
+        },)
 
         # for averaging loss across batches
         self.train_loss = MeanMetric()
@@ -304,6 +318,7 @@ class LitKDStudentModule(LightningModule):
         # by default lightning executes validation step sanity checks before training starts,
         # so we need to make sure val_acc_best doesn't store accuracy from these checks
         self.val_acc_best.reset()
+        # self.val_acc_best_at5.reset()
 
     def step(self, batch: Any):
         index = None
@@ -334,9 +349,8 @@ class LitKDStudentModule(LightningModule):
 
         # update and log metrics
         self.train_loss(loss)
-        self.train_acc(preds, targets)
         self.log("train/loss", self.train_loss, on_step=False, on_epoch=True, prog_bar=True)
-        self.log("train/acc", self.train_acc, on_step=False, on_epoch=True, prog_bar=True)
+        self.log('train/metrics/', self.metrics_train(preds, targets), on_step=False, on_epoch=True, prog_bar=True)
 
         # we can return here dict with any tensors
         # and then read it in some callback or in `training_epoch_end()` below
@@ -345,6 +359,7 @@ class LitKDStudentModule(LightningModule):
 
     def training_epoch_end(self, outputs: List[Any]):
         # `outputs` is a list of dicts returned from `training_step()`
+        self.metrics_train.reset()
         pass
 
     def validation_step(self, batch: Any, batch_idx: int):
@@ -352,31 +367,33 @@ class LitKDStudentModule(LightningModule):
 
         # update and log metrics
         self.val_loss(loss)
-        self.val_acc(preds, targets)
         self.log("val/loss", self.val_loss, on_step=False, on_epoch=True, prog_bar=True)
-        self.log("val/acc", self.val_acc, on_step=False, on_epoch=True, prog_bar=True)
+        val_metrics = self.metrics_val(preds, targets)
+        val_acc = float(val_metrics['acc'])
+        self.log("val/acc", val_acc, on_step=False, on_epoch=True, prog_bar=True)
+        self.log('val/metrics/', val_metrics, on_step=False, on_epoch=True, prog_bar=True)
 
         return {"loss": loss, "preds": preds, "targets": targets}
 
     def validation_epoch_end(self, outputs: List[Any]):
-        acc = self.val_acc.compute()  # get current val acc
+        val_metrics = self.metrics_val.compute()
+        acc = float(val_metrics['acc'])
         self.val_acc_best(acc)  # update best so far val acc
-        # log `val_acc_best` as a value through `.compute()` method, instead of as a metric object
         # otherwise metric would be reset by lightning after each epoch
-        self.log("val/acc_best", self.val_acc_best.compute(), prog_bar=True)
+        self.log("val/acc_bes", self.val_acc_best.compute(), prog_bar=True)
+        self.metrics_val.reset()
 
     def test_step(self, batch: Any, batch_idx: int):
         loss, preds, targets = self.step(batch)
-
         # update and log metrics
         self.test_loss(loss)
-        self.test_acc(preds, targets)
         self.log("test/loss", self.test_loss, on_step=False, on_epoch=True, prog_bar=True)
-        self.log("test/acc", self.test_acc, on_step=False, on_epoch=True, prog_bar=True)
-
+        self.log('test/metrics/', self.metrics_test(preds, targets), on_step=False, on_epoch=True, prog_bar=True)
+        
         return {"loss": loss, "preds": preds, "targets": targets}
 
     def test_epoch_end(self, outputs: List[Any]):
+        self.metrics_test.reset()
         pass
 
     def configure_optimizers(self):
