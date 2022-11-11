@@ -113,7 +113,7 @@ toml==0.10.2
 tomli==2.0.1
 torch==1.13.0
 torch-tb-profiler==0.4.0
-torchmetrics==0.9.3
+torchmetrics==0.10.2
 torchvision==0.14.0
 tqdm==4.62.2
 typing_extensions==4.4.0
