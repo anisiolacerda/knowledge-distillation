@@ -1,7 +1,7 @@
 # @package _global_
 
 # to execute this experiment run:
-# python train.py experiment=kd_mnist
+# python train.py experiment=example_kd_student_cifar100
 
 defaults:
   - override /datamodule: cifar100.yaml
@@ -12,7 +12,7 @@ defaults:
 # all parameters below will be merged with parameters from default configurations set above
 # this allows you to overwrite only specified parameters
 
-tags: ["cifar100", "fsp", "student"]
+tags: ["cifar100", "kd"]
 
 seed: 12345
 
@@ -21,15 +21,15 @@ model:
   model_t_path: './data/save/models/resnet32x4_vanilla/ckpt_epoch_240.pth'
   n_cls: 100
   kd_T: 4
-  gamma: 1
-  alpha: 0
-  beta: 50
-  distill: 'fsp'
+  gamma: 0.1
+  alpha: 0.9
+  beta: 0
+  distill: 'kd'
 
 logger:
   wandb:
     _target_: pytorch_lightning.loggers.wandb.WandbLogger
-    project: "knowledge_distillation"
+    project: "causal_knowledge_distillation"
     name: eval_first_round_baselines
     tags: ${tags}
     group: "cifar100_student"

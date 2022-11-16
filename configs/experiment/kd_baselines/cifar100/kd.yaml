@@ -5,14 +5,14 @@
 
 defaults:
   - override /datamodule: cifar100.yaml
-  - override /model: litkd.yaml
+  - override /model: litkd_student_iid.yaml
   - override /callbacks: default.yaml
   - override /trainer: cifar100_gpu.yaml
 
 # all parameters below will be merged with parameters from default configurations set above
 # this allows you to overwrite only specified parameters
 
-tags: ["cifar100", "kd"]
+tags: ["cifar100", "kd", "student"]
 
 seed: 12345
 
@@ -32,4 +32,4 @@ logger:
     project: "knowledge_distillation"
     name: eval_first_round_baselines
     tags: ${tags}
-    group: "cifar100"
+    group: "cifar100_student"

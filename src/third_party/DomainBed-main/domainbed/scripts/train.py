@@ -15,6 +15,8 @@ import torch
 import torchvision
 import torch.utils.data
 
+sys.path.append('/srv/anisio/knowledge-distillation/src/third_party/DomainBed-main/')
+
 from domainbed import datasets
 from domainbed import hparams_registry
 from domainbed import algorithms
@@ -97,7 +99,8 @@ if __name__ == "__main__":
 
     if args.dataset in vars(datasets):
         dataset = vars(datasets)[args.dataset](args.data_dir,
-            args.test_envs, hparams)
+                                               args.test_envs, 
+                                               hparams)
     else:
         raise NotImplementedError
 
@@ -163,6 +166,7 @@ if __name__ == "__main__":
         batch_size=64,
         num_workers=dataset.N_WORKERS)
         for env, _ in (in_splits + out_splits + uda_splits)]
+        
     eval_weights = [None for _, weights in (in_splits + out_splits + uda_splits)]
     eval_loader_names = ['env{}_in'.format(i)
         for i in range(len(in_splits))]

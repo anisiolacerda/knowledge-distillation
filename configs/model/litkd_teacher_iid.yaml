@@ -1,11 +1,11 @@
-_target_: src.models.litkd_student_module.LitKDStudentModule
+_target_: src.models.litkd_teacher_iid_module.LitKDTeacherIIDModule
 
 optimizer:
   _target_: torch.optim.SGD
   _partial_: true
-  lr: 0.05
+  lr: 0.01
   momentum: 0.9
-  weight_decay: 0.1
+  weight_decay: 5e-4
 
 scheduler:
   _target_: torch.optim.lr_scheduler.MultiStepLR

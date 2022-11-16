@@ -28,9 +28,8 @@ class DistillKL(torch.nn.Module):
         loss = F.kl_div(p_s, p_t, size_average=False) * (self.T**2) / y_s.shape[0]
         return loss
 
-class LitKDStudentModule(LightningModule):
-    """Example of LightningModule for MNIST classification.
-
+class LitKDStudentIIDModule(LightningModule):
+    """
     A LightningModule organizes your PyTorch code into 6 sections:
         - Computations (init)
         - Train loop (training_step)
@@ -125,6 +124,11 @@ class LitKDStudentModule(LightningModule):
             'F1Score': F1Score(num_classes=self.n_cls),
             'CohenKappa': CohenKappa(num_classes=self.n_cls),
         },)
+
+        # metric objects for calculating and averaging accuracy across batches
+        self.train_acc = Accuracy()
+        self.val_acc = Accuracy()
+        self.test_acc = Accuracy()
 
         # for averaging loss across batches
         self.train_loss = MeanMetric()
@@ -352,6 +356,9 @@ class LitKDStudentModule(LightningModule):
         self.log("train/loss", self.train_loss, on_step=False, on_epoch=True, prog_bar=True)
         self.log('train/metrics/', self.metrics_train(preds, targets), on_step=False, on_epoch=True, prog_bar=True)
 
+        self.train_acc(preds, targets)
+        self.log("train/acc", self.train_acc, on_step=False, on_epoch=True, prog_bar=True)
+
         # we can return here dict with any tensors
         # and then read it in some callback or in `training_epoch_end()` below
         # remember to always return loss from `training_step()` or backpropagation will fail!
@@ -359,7 +366,7 @@ class LitKDStudentModule(LightningModule):
 
     def training_epoch_end(self, outputs: List[Any]):
         # `outputs` is a list of dicts returned from `training_step()`
-        self.metrics_train.reset()
+        # self.metrics_train.reset()
         pass
 
     def validation_step(self, batch: Any, batch_idx: int):
@@ -369,9 +376,14 @@ class LitKDStudentModule(LightningModule):
         self.val_loss(loss)
         self.log("val/loss", self.val_loss, on_step=False, on_epoch=True, prog_bar=True)
         val_metrics = self.metrics_val(preds, targets)
-        val_acc = float(val_metrics['acc'])
-        self.log("val/acc", val_acc, on_step=False, on_epoch=True, prog_bar=True)
         self.log('val/metrics/', val_metrics, on_step=False, on_epoch=True, prog_bar=True)
+
+        # val_acc = float(val_metrics['acc'])
+        
+        self.val_acc(preds, targets)
+        self.log("val/acc", self.val_acc, on_step=False, on_epoch=True, prog_bar=True)
+
+        # self.log("val/acc", val_acc, on_step=False, on_epoch=True, prog_bar=True)
 
         return {"loss": loss, "preds": preds, "targets": targets}
 
@@ -381,7 +393,7 @@ class LitKDStudentModule(LightningModule):
         self.val_acc_best(acc)  # update best so far val acc
         # otherwise metric would be reset by lightning after each epoch
         self.log("val/acc_bes", self.val_acc_best.compute(), prog_bar=True)
-        self.metrics_val.reset()
+        # self.metrics_val.reset()
 
     def test_step(self, batch: Any, batch_idx: int):
         loss, preds, targets = self.step(batch)
@@ -390,10 +402,13 @@ class LitKDStudentModule(LightningModule):
         self.log("test/loss", self.test_loss, on_step=False, on_epoch=True, prog_bar=True)
         self.log('test/metrics/', self.metrics_test(preds, targets), on_step=False, on_epoch=True, prog_bar=True)
         
+        self.test_acc(preds, targets)
+        self.log("test/acc", self.test_acc, on_step=False, on_epoch=True, prog_bar=True)
+
         return {"loss": loss, "preds": preds, "targets": targets}
 
     def test_epoch_end(self, outputs: List[Any]):
-        self.metrics_test.reset()
+        # self.metrics_test.reset()
         pass
 
     def configure_optimizers(self):
