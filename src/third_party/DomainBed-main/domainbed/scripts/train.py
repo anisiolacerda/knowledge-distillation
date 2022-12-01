@@ -14,14 +14,16 @@ import PIL
 import torch
 import torchvision
 import torch.utils.data
-
 sys.path.append('/srv/anisio/knowledge-distillation/src/third_party/DomainBed-main/')
+
+from domainbed.lib.query import Q
 
 from domainbed import datasets
 from domainbed import hparams_registry
 from domainbed import algorithms
 from domainbed.lib import misc
 from domainbed.lib.fast_data_loader import InfiniteDataLoader, FastDataLoader
+from domainbed import model_selection
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Domain generalization')
@@ -142,7 +144,7 @@ if __name__ == "__main__":
         out_splits.append((out, out_weights))
         if len(uda):
             uda_splits.append((uda, uda_weights))
-
+        
     if args.task == "domain_adaptation" and len(uda_splits) == 0:
         raise ValueError("Not enough unlabeled samples for domain adaptation.")
 
@@ -206,6 +208,7 @@ if __name__ == "__main__":
         }
         torch.save(save_dict, os.path.join(args.output_dir, filename))
 
+    eval_method = model_selection.IIDAccuracySelectionMethod()
 
     last_results_keys = None
     for step in range(start_step, n_steps):
@@ -261,6 +264,12 @@ if __name__ == "__main__":
 
             if args.save_model_every_checkpoint:
                 save_checkpoint(f'model_step{step}.pkl')
+
+            rr = Q([results])
+            # print(f'\n\n--{rr.args.values[-1]["test_envs"]}\n\n--')
+            # print(lambda r: len(r['args']['test_envs']))
+            run_acc = eval_method.run_acc(rr)
+            print(f'\n\n\n-->>{run_acc}')
 
     save_checkpoint('model.pkl')
 

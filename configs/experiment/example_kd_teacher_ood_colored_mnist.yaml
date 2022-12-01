@@ -1,0 +1,52 @@
+# @package _global_
+
+# to execute this experiment run:
+# python train.py experiment=example_kd_teacher_iid_coloredmnist
+
+defaults:
+  - override /datamodule: ood_datamodule.yaml
+  - override /model: litkd_teacher_ood.yaml
+  - override /callbacks: default.yaml
+  - override /trainer: ood_gpu.yaml
+
+# all parameters below will be merged with parameters from default configurations set above
+# this allows you to overwrite only specified parameters
+
+tags: [ "ERM", "ColoredMNIST", "teacher"]
+
+seed: 12345
+
+
+dataset_name: 'ColoredMNIST'
+input_shape: [2, 28, 28,]
+n_cls: 10
+test_envs: [2]
+data_dir: '.domainbed/data/MNIST/'
+
+model:
+  algorithm_name: 'ERM'
+  dataset_name: ${dataset_name}
+  n_cls: ${n_cls}
+  test_envs: ${test_envs}
+  seed: 26
+  data_dir: '.domainbed/data/MNIST/'
+  input_shape: ${input_shape}
+
+datamodule:
+  algorithm_name: 'ERM'
+  dataset_name: ${dataset_name}
+  data_dir: '.domainbed/data/MNIST/'
+  task: 'domain_generalization'
+  n_cls: ${n_cls}
+  test_envs: ${test_envs}
+  input_shape: ${input_shape}
+  holdout_fraction: 0.2
+  uda_holdout_fraction: 0
+
+logger:
+  wandb:
+    _target_: pytorch_lightning.loggers.wandb.WandbLogger
+    project: "knowledge_distillation"
+    name: eval_first_round_baselines
+    tags: ${tags}
+    group: "coloredmnist_teacher"

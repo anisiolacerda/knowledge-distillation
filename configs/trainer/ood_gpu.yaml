@@ -5,5 +5,5 @@ accelerator: gpu
 devices: 1
 
 min_epochs: 1
-max_epochs: 240
-gradient_clip_val: 0.5
+max_epochs: 2
+gradient_clip_val: 0.0
