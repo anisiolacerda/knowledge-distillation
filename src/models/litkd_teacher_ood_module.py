@@ -16,6 +16,9 @@ from datamodules import ood_datasets
 from domainbed import model_selection
 from domainbed.lib.query import Q
 
+import matplotlib
+from mlxtend.plotting import plot_confusion_matrix
+
 class LitKDTeacherOODModule(LightningModule):
     """
     A LightningModule organizes your PyTorch code into 6 sections:
@@ -68,6 +71,8 @@ class LitKDTeacherOODModule(LightningModule):
                                     self.test_envs,
                                     self.hparams)
         
+        self.class_ids = ['%s' % i for i in range(n_cls)]
+
         self.metrics_train = MetricCollection({
             'acc': Accuracy(),
             'preccision': Precision(num_classes=n_cls, average='macro'),
@@ -100,10 +105,31 @@ class LitKDTeacherOODModule(LightningModule):
             'preccision': Precision(num_classes=n_cls, average='macro'),
             'recall': Recall(num_classes=n_cls, average='macro'),
             'F1Score': F1Score(num_classes=n_cls),
-            'CohenKappa': CohenKappa(num_classes=n_cls)
+            'CohenKappa': CohenKappa(num_classes=n_cls),
         },)
+
             self.val_loss_dict[name] = MeanMetric()
             self.val_acc_best_dict[name] = MaxMetric()
+
+        self.test_loss_dict = nn.ModuleDict()
+        self.test_acc_best_dict = nn.ModuleDict()
+        self.metrics_test_dict = nn.ModuleDict()
+        for name in self.eval_loader_names:
+            self.metrics_test_dict[name] = MetricCollection({
+            'acc': Accuracy(),
+            'preccision': Precision(num_classes=n_cls, average='macro'),
+            'recall': Recall(num_classes=n_cls, average='macro'),
+            'F1Score': F1Score(num_classes=n_cls),
+            'CohenKappa': CohenKappa(num_classes=n_cls),
+            # 'ConfusionMatrix': ConfusionMatrix(num_classes=n_cls)
+        },)
+
+            self.test_loss_dict[name] = MeanMetric()
+            self.test_acc_best_dict[name] = MaxMetric()
+
+        self.test_cmat = nn.ModuleDict()
+        for name in self.eval_loader_names:
+            self.test_cmat[name] = ConfusionMatrix(num_classes=n_cls)
 
         # metric objects for calculating and averaging accuracy across batches
         self.train_acc = Accuracy()
@@ -176,19 +202,72 @@ class LitKDTeacherOODModule(LightningModule):
             self.log("val/%s/acc_bes" % (name), self.val_acc_best_dict[name].compute(), prog_bar=True)
             self.metrics_val_dict[name].reset()
 
-    def test_step(self, batch: Any, batch_idx: int):
-        pass
-        # loss, preds, targets = self.step(batch)
-        # # update and log metrics
-        # self.test_loss(loss)
-        # self.log("test/loss", self.test_loss, on_step=False, on_epoch=True, prog_bar=True)
-        # self.log('test/metrics/', self.metrics_test(preds, targets), on_step=False, on_epoch=True, prog_bar=True)
-        
-        # self.test_acc(preds, targets)
-        # self.log("test/acc", self.test_acc, on_step=False, on_epoch=True, prog_bar=True)
+    def test_step(self, batch: Any = None, batch_idx: int = None):
+        results = {}
+        results['epoch'] = self.current_epoch
+        results['args'] = {'test_envs' : self.test_envs}
+        for name in self.eval_loader_names:
+            tmp_res = self.algorithm.update(batch[name], loop='val')
+            loss, preds, targets = tmp_res['loss'], tmp_res['preds'], tmp_res['targets']
+            test_metrics = self.metrics_test_dict[name](preds, targets)
+            self.log('test/%s/metrics/' % (name), test_metrics, on_step=False, on_epoch=True, prog_bar=True)
 
-        # return {"loss": loss, "preds": preds, "targets": targets}
-    
+            # update and log metrics
+            self.test_loss_dict[name](loss)
+            self.log("test/%s/loss" % (name), self.test_loss_dict[name], on_step=False, on_epoch=True, prog_bar=True)
+        
+            results[name+'_acc'] = test_metrics['acc'].detach().cpu()
+
+            import wandb
+            top_pred_ids = preds.cpu().numpy().argmax(axis=1)
+            ground_truth_class_ids = targets.cpu().numpy()
+            # class_ids = ['%s' % i for i in set([ground_truth_class_ids])]
+            wandb.log({'conf_mat/%s' % name :
+                      wandb.plot.confusion_matrix(probs=None,
+                                                  preds=top_pred_ids, 
+                                                  y_true=ground_truth_class_ids,
+                                                  class_names=self.class_ids)}
+                    )
+
+        results.update({
+                'hparams': self.hparams,
+            })
+        rr = Q([results])
+        run_acc = self.eval_method.run_acc(rr)
+        run_acc = run_acc
+        self.log("test/acc", run_acc['test_acc'], on_step=False, on_epoch=True, prog_bar=True)
+        return {"loss": loss, "preds": preds, "targets": targets}
+
+    def test_epoch_end(self, outputs: List[Any]):
+        results = {}
+        results['epoch'] = self.current_epoch
+        for name in self.eval_loader_names:
+            test_metrics = self.metrics_test_dict[name].compute()
+            acc = float(test_metrics['acc'])
+            self.test_acc_best_dict[name](acc)  # update best so far val acc
+            
+            results[name+'acc'] = test_metrics['acc']
+
+            # otherwise metric would be reset by lightning after each epoch
+            self.log("test/%s/acc_bes" % (name), self.test_acc_best_dict[name].compute(), prog_bar=True)
+            self.metrics_test_dict[name].reset()
+
+
+
+            # # confusion matrix file and figure
+            # cmat_tensor = self.test_cmat[name].compute()
+            # cmat = cmat_tensor.cpu().numpy()
+            # fig, ax = plot_confusion_matrix(
+            #     conf_mat=cmat,
+            #     # class_names=class_dict.values(),
+            #     norm_colormap=matplotlib.colors.LogNorm()  
+            #     # normed colormaps highlight the off-diagonals 
+            #     # for high-accuracy models better
+            # )
+            # key = 'test/%s/confusion_matrix' % name
+            # self.log(key, fig)
+        
+
     def configure_optimizers(self):
         """Choose what optimizers and learning-rate schedulers to use in your optimization.
         Normally you'd need one. But in the case of GANs or similar you might have multiple.

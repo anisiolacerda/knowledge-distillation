@@ -132,16 +132,20 @@ class OODDataModule(LightningDataModule):
         evals = zip(self.eval_loader_names, self.eval_loaders)
         for name, ldr in evals:
             loaders[name] = ldr
-        combined_loaders = CombinedLoader(loaders=loaders)
+        self.combined_loaders = CombinedLoader(loaders=loaders)
 
-        return combined_loaders
+        from copy import copy
+        self.test_combined_loaders = copy(self.combined_loaders)
+        return self.combined_loaders
 
     def test_dataloader(self):
-        pass
-    #     return DataLoader(self.mnist_test, batch_size=self.batch_size)
+        # loaders = {}
+        # evals = zip(self.eval_loader_names, self.eval_loaders)
+        # for name, ldr in evals:
+        #     loaders[name] = ldr
+        # combined_loaders = CombinedLoader(loaders=loaders)
 
-    # def predict_dataloader(self):
-    #     return DataLoader(self.mnist_predict, batch_size=self.batch_size)
+        return self.test_combined_loaders
 
     # def teardown(self, stage: str):
     #     # Used to clean-up when the run is finished

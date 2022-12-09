@@ -836,30 +836,35 @@ class SagNet(Algorithm):
         x = x * (var + eps).sqrt() + mean
         return x.view(*sizes)
 
-    def update(self, minibatches, unlabeled=None):
-        all_x = torch.cat([x for x, y in minibatches])
-        all_y = torch.cat([y for x, y in minibatches])
+    def update(self, minibatches, loop=None, unlabeled=None):
+        if loop == 'train':
+            all_x = torch.cat([x for x, y in minibatches])
+            all_y = torch.cat([y for x, y in minibatches])
+        elif loop == 'val':
+            all_x, all_y = minibatches
+        else:
+            raise TypeError   
 
         # learn content
-        self.optimizer_f.zero_grad()
-        self.optimizer_c.zero_grad()
+        # self.optimizer_f.zero_grad()
+        # self.optimizer_c.zero_grad()
         loss_c = F.cross_entropy(self.forward_c(all_x), all_y)
-        loss_c.backward()
-        self.optimizer_f.step()
-        self.optimizer_c.step()
+        # loss_c.backward()
+        # self.optimizer_f.step()
+        # self.optimizer_c.step()
 
         # learn style
-        self.optimizer_s.zero_grad()
+        # self.optimizer_s.zero_grad()
         loss_s = F.cross_entropy(self.forward_s(all_x), all_y)
-        loss_s.backward()
-        self.optimizer_s.step()
+        # loss_s.backward()
+        # self.optimizer_s.step()
 
         # learn adversary
-        self.optimizer_f.zero_grad()
+        # self.optimizer_f.zero_grad()
         loss_adv = -F.log_softmax(self.forward_s(all_x), dim=1).mean(1).mean()
         loss_adv = loss_adv * self.weight_adv
-        loss_adv.backward()
-        self.optimizer_f.step()
+        # loss_adv.backward()
+        # self.optimizer_f.step()
 
         return {'loss_c': loss_c.item(), 'loss_s': loss_s.item(),
                 'loss_adv': loss_adv.item()}
