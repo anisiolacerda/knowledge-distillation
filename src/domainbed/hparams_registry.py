@@ -1,6 +1,6 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved
 import numpy as np
-from domainbed.lib import misc
+from .lib import misc
 
 
 def _define_hparam(hparams, hparam_name, default_val, random_val_fn):

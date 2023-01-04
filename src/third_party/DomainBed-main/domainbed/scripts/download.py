@@ -27,7 +27,7 @@ def stage_path(data_dir, name):
 
 
 def download_and_extract(url, dst, remove=True):
-    gdown.download(url, dst, quiet=False)
+    gdown.download(' ' + url, dst, quiet=False)
 
     if dst.endswith(".tar.gz"):
         tar = tarfile.open(dst, "r:gz")
@@ -98,7 +98,7 @@ def download_vlcs(data_dir):
     # Original URL: http://www.eecs.qmul.ac.uk/~dl307/project_iccv2017
     full_path = stage_path(data_dir, "VLCS")
 
-    download_and_extract("https://drive.google.com/uc?id=1skwblH1_okBwxWxmRsp9_qi15hyPpxg8",
+    download_and_extract("https://drive.google.com/uc?export=download&confirm=9iBg&id=1skwblH1_okBwxWxmRsp9_qi15hyPpxg8",
                          os.path.join(data_dir, "VLCS.tar.gz"))
 
 
@@ -116,7 +116,7 @@ def download_pacs(data_dir):
     # Original URL: http://www.eecs.qmul.ac.uk/~dl307/project_iccv2017
     full_path = stage_path(data_dir, "PACS")
 
-    download_and_extract("https://drive.google.com/uc?id=1JFr8f805nMUelQWWmfnJR3y4_SYoN5Pd",
+    download_and_extract("https://drive.google.com/uc?export=download&confirm=9iBg&id=1JFr8f805nMUelQWWmfnJR3y4_SYoN5Pd",
                          os.path.join(data_dir, "PACS.zip"))
 
     os.rename(os.path.join(data_dir, "kfold"),
@@ -129,7 +129,7 @@ def download_office_home(data_dir):
     # Original URL: http://hemanthdv.org/OfficeHome-Dataset/
     full_path = stage_path(data_dir, "office_home")
 
-    download_and_extract("https://drive.google.com/uc?id=1uY0pj7oFsjMxRwaD3Sxy0jgel0fsYXLC",
+    download_and_extract("https://drive.google.com/uc?export=download&confirm=9iBg&id=1uY0pj7oFsjMxRwaD3Sxy0jgel0fsYXLC",
                          os.path.join(data_dir, "office_home.zip"))
 
     os.rename(os.path.join(data_dir, "OfficeHomeDataset_10072016"),
@@ -263,12 +263,12 @@ if __name__ == "__main__":
     parser.add_argument('--data_dir', type=str, required=True)
     args = parser.parse_args()
 
-    # download_mnist(args.data_dir)
-    # download_pacs(args.data_dir)
-    # download_office_home(args.data_dir)
-    # download_domain_net(args.data_dir)
-    # download_vlcs(args.data_dir)
+    #download_mnist(args.data_dir)
+    #download_pacs(args.data_dir)
+    #download_office_home(args.data_dir)
+    #download_domain_net(args.data_dir)
+    #download_vlcs(args.data_dir)
     download_terra_incognita(args.data_dir)
-    # download_sviro(args.data_dir)
-    # Camelyon17Dataset(root_dir=args.data_dir, download=True)
-    # FMoWDataset(root_dir=args.data_dir, download=True)
+    #download_sviro(args.data_dir)
+    #Camelyon17Dataset(root_dir=args.data_dir, download=True)
+    #FMoWDataset(root_dir=args.data_dir, download=True)

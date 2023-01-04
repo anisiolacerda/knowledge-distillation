@@ -2,7 +2,7 @@ _target_: src.datamodules.ood_datamodule.OODDataModule
 data_dir: ${paths.data_dir}
 dataset_name: None
 test_envs: None
-batch_size: 64
+batch_size: 32
 # train_val_split: [45000, 5000]
 num_workers: 8
 pin_memory: False

@@ -269,7 +269,7 @@ if __name__ == "__main__":
             # print(f'\n\n--{rr.args.values[-1]["test_envs"]}\n\n--')
             # print(lambda r: len(r['args']['test_envs']))
             run_acc = eval_method.run_acc(rr)
-            print(f'\n\n\n-->>{run_acc}')
+            # print(f'\n\n\n-->>{run_acc}')
 
     save_checkpoint('model.pkl')
 

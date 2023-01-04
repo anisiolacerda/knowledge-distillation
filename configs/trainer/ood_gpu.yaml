@@ -5,5 +5,9 @@ accelerator: gpu
 devices: 1
 
 min_epochs: 1
-max_epochs: 3
+max_epochs: 5001
 gradient_clip_val: 0.0
+
+limit_train_batches: 1
+limit_val_batches: 1
+limit_test_batches: 1

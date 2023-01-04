@@ -1,5 +1,8 @@
 # https://hydra.cc/docs/configure_hydra/intro/
 
+# search_path:
+#   - configs/experiment/
+
 # enable color logging
 defaults:
   - override hydra_logging: colorlog

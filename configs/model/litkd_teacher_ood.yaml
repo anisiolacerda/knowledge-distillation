@@ -1,12 +1,12 @@
 _target_: src.models.litkd_teacher_ood_module.LitKDTeacherOODModule
 
 eval_method:
-  _target_: domainbed.model_selection.IIDAccuracySelectionMethod
+  _target_: src.domainbed.model_selection.IIDAccuracySelectionMethod
 
 optimizer:
   _target_: torch.optim.Adam
   _partial_: true
-  lr: 0.001
+  lr: 1e-3
   weight_decay: 0.0
 
 # scheduler:

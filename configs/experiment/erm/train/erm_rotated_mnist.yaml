@@ -12,13 +12,13 @@ defaults:
 # all parameters below will be merged with parameters from default configurations set above
 # this allows you to overwrite only specified parameters
 
-tags: [ "ERM", "ColoredMNIST", "teacher"]
+tags: [ "ERM", "RotatedMNIST", "teacher"]
 
-seed: 12345
+seed: 2609
 
-dataset_name: 'ColoredMNIST'
+dataset_name: 'RotatedMNIST'
 input_shape: [2, 28, 28,]
-n_cls: 2
+n_cls: 10
 test_envs: [2]
 data_dir: '.domainbed/data/MNIST/'
 
@@ -39,7 +39,7 @@ datamodule:
   n_cls: ${n_cls}
   test_envs: ${test_envs}
   input_shape: ${input_shape}
-  holdout_fraction: 0.2
+  holdout_fraction: 0.1
   uda_holdout_fraction: 0
 
 logger:

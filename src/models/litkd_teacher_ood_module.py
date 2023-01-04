@@ -10,11 +10,9 @@ from torchmetrics.classification.accuracy import Accuracy
 from torchmetrics import Precision, Recall, F1Score, CohenKappa, ConfusionMatrix
 
 from . import ood_algorithms
-from domainbed import hparams_registry
-# from domainbed.lib import misc
-from datamodules import ood_datasets
-from domainbed import model_selection
-from domainbed.lib.query import Q
+from ..domainbed import hparams_registry
+from ..datamodules import ood_datasets
+from ..domainbed.lib.query import Q
 
 import matplotlib
 from mlxtend.plotting import plot_confusion_matrix
@@ -267,7 +265,6 @@ class LitKDTeacherOODModule(LightningModule):
             # key = 'test/%s/confusion_matrix' % name
             # self.log(key, fig)
         
-
     def configure_optimizers(self):
         """Choose what optimizers and learning-rate schedulers to use in your optimization.
         Normally you'd need one. But in the case of GANs or similar you might have multiple.

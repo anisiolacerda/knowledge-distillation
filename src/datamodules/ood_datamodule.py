@@ -9,6 +9,8 @@ from domainbed.lib.fast_data_loader import InfiniteDataLoader, FastDataLoader
 
 from pytorch_lightning.trainer.supporters import CombinedLoader
 
+from copy import copy
+
 class OODDataModule(LightningDataModule):
     def __init__(self,
                  algorithm_name: str = None,
@@ -134,7 +136,6 @@ class OODDataModule(LightningDataModule):
             loaders[name] = ldr
         self.combined_loaders = CombinedLoader(loaders=loaders)
 
-        from copy import copy
         self.test_combined_loaders = copy(self.combined_loaders)
         return self.combined_loaders
 

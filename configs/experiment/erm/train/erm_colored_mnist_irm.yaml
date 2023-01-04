@@ -14,7 +14,7 @@ defaults:
 
 tags: [ "ERM", "ColoredMNIST", "teacher"]
 
-seed: 12345
+seed: 2609
 
 dataset_name: 'ColoredMNIST'
 input_shape: [2, 28, 28,]
@@ -39,7 +39,7 @@ datamodule:
   n_cls: ${n_cls}
   test_envs: ${test_envs}
   input_shape: ${input_shape}
-  holdout_fraction: 0.2
+  holdout_fraction: 0.1
   uda_holdout_fraction: 0
 
 logger:
