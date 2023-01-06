@@ -119,7 +119,6 @@ class ERM(Algorithm):
     def predict(self, x):
         return self.network(x)
 
-
 class Fish(Algorithm):
     """
     Implementation of Fish, as seen in Gradient Matching for Domain

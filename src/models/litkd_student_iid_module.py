@@ -7,7 +7,6 @@ from torchmetrics import MaxMetric, MeanMetric, MetricCollection
 from torchmetrics.classification.accuracy import Accuracy
 from torchmetrics import Precision, Recall, AUC, F1Score, CohenKappa, ConfusionMatrix
 
-
 from models.components import model_dict
 from models.components.util import Embed, ConvReg, LinearEmbed
 from models.components.util import Connector, Translator, Paraphraser

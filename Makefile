@@ -36,21 +36,22 @@ test-full: ## Run all tests
 train: ## Train the model
 	python src/train.py 
 
-train_erm_all: train_erm_colored_mnist train_erm_rotated_mnist train_erm_vlcs train_erm_pacs train_erm_office_home train_erm_terra_incognita train_erm_domain_net train_erm_sviro train_erm_wilds_camelyon train_erm_wilds_fmow train_erm_celeba_blond train_erm_nico
+train_erm_all: train_erm_colored_mnist train_erm_rotated_mnist train_erm_pacs train_erm_office_home train_erm_terra_incognita train_erm_domain_net 
+#train_erm_vlcs train_erm_sviro train_erm_wilds_camelyon train_erm_wilds_fmow train_erm_celeba_blond train_erm_nico
 #train_erm_imagenet_a train_erm_imagenet_r train_erm_imagenet_v2 
 
 train_erm_colored_mnist:
-	python src/train.py experiment=erm/train/erm_colored_mnist_irm 'model={test_envs: [0]}' 'datamodule={btch_size: 64}'
-	python src/train.py experiment=erm/train/erm_colored_mnist_irm 'model={test_envs: [1]}' 'datamodule={btch_size: 64}'
-	python src/train.py experiment=erm/train/erm_colored_mnist_irm 'model={test_envs: [2]}' 'datamodule={btch_size: 64}'
+	python src/train.py experiment=erm/train/erm_colored_mnist_irm 'model={test_envs: [0]}' 'datamodule={batch_size: 64}'
+	python src/train.py experiment=erm/train/erm_colored_mnist_irm 'model={test_envs: [1]}' 'datamodule={batch_size: 64}'
+	python src/train.py experiment=erm/train/erm_colored_mnist_irm 'model={test_envs: [2]}' 'datamodule={batch_size: 64}'
 
 train_erm_rotated_mnist:
-	python src/train.py experiment=erm/train/erm_rotated_mnist 'model={test_envs: [0]}' 'datamodule={btch_size: 64}'
-	python src/train.py experiment=erm/train/erm_rotated_mnist 'model={test_envs: [1]}' 'datamodule={btch_size: 64}'
-	python src/train.py experiment=erm/train/erm_rotated_mnist 'model={test_envs: [2]}' 'datamodule={btch_size: 64}'
-	python src/train.py experiment=erm/train/erm_rotated_mnist 'model={test_envs: [3]}' 'datamodule={btch_size: 64}'
-	python src/train.py experiment=erm/train/erm_rotated_mnist 'model={test_envs: [4]}' 'datamodule={btch_size: 64}'
-	python src/train.py experiment=erm/train/erm_rotated_mnist 'model={test_envs: [5]}' 'datamodule={btch_size: 64}'
+	python src/train.py experiment=erm/train/erm_rotated_mnist 'model={test_envs: [0]}' 'datamodule={batch_size: 64}'
+	python src/train.py experiment=erm/train/erm_rotated_mnist 'model={test_envs: [1]}' 'datamodule={batch_size: 64}'
+	python src/train.py experiment=erm/train/erm_rotated_mnist 'model={test_envs: [2]}' 'datamodule={batch_size: 64}'
+	python src/train.py experiment=erm/train/erm_rotated_mnist 'model={test_envs: [3]}' 'datamodule={batch_size: 64}'
+	python src/train.py experiment=erm/train/erm_rotated_mnist 'model={test_envs: [4]}' 'datamodule={batch_size: 64}'
+	python src/train.py experiment=erm/train/erm_rotated_mnist 'model={test_envs: [5]}' 'datamodule={batch_size: 64}'
  
 train_erm_vlcs:
 	python src/train.py experiment=erm/train/erm_vlcs 'model={test_envs: [0]}'

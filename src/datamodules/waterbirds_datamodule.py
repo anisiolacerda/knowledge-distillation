@@ -110,8 +110,8 @@ class WaterBirdsDataModule(LightningDataModule):
     def setup(self, stage: Optional[str] = None):
         if not self.data_train and not self.data_val and not self.data_test:
             self.data_train = WB_MultiDomainDatasetTripleFD(self.data_dir)
-            self.data_val =
-            self.data_test = 
+            # self.data_val =
+            # self.data_test = 
 
     def train_dataloader(self):
         return DataLoader(
