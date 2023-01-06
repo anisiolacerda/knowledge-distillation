@@ -36,8 +36,8 @@ test-full: ## Run all tests
 train: ## Train the model
 	python src/train.py 
 
-train_erm_all: train_erm_colored_mnist train_erm_rotated_mnist train_erm_pacs train_erm_office_home train_erm_terra_incognita train_erm_domain_net 
-#train_erm_vlcs train_erm_sviro train_erm_wilds_camelyon train_erm_wilds_fmow train_erm_celeba_blond train_erm_nico
+train_erm_all: train_erm_colored_mnist train_erm_rotated_mnist train_erm_pacs train_erm_office_home train_erm_terra_incognita 
+#train_erm_domain_net train_erm_vlcs train_erm_sviro train_erm_wilds_camelyon train_erm_wilds_fmow train_erm_celeba_blond train_erm_nico
 #train_erm_imagenet_a train_erm_imagenet_r train_erm_imagenet_v2 
 
 train_erm_colored_mnist:
