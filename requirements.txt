@@ -10,7 +10,7 @@ Pillow==9.4.0
 pyrootutils==1.0.4
 pytorch_lightning==1.7.1
 rich==13.0.0
-torch==1.13.0
+torch==1.13.1
 torchmetrics==0.9.3
 torchvision==0.14.0
 tqdm==4.62.2
