@@ -525,3 +525,5 @@ tags
 data/
 
 logs/
+
+wandb/

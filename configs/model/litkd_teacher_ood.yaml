@@ -1,5 +1,7 @@
 _target_: src.models.litkd_teacher_ood_module.LitKDTeacherOODModule
 
+results_dir: ${paths.output_dir}
+
 eval_method:
   _target_: src.domainbed.model_selection.IIDAccuracySelectionMethod
 

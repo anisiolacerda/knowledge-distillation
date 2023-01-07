@@ -14,8 +14,8 @@ try:
 except:
     backpack = None
 
-from domainbed import networks
-from domainbed.lib.misc import (
+from . import networks
+from .lib.misc import (
     random_pairs_of_minibatches, split_meta_train_test, ParamDict,
     MovingAverage, l2_between_dicts, proj
 )

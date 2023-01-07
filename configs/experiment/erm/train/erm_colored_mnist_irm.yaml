@@ -28,7 +28,7 @@ model:
   n_cls: ${n_cls}
   test_envs: ${test_envs}
   seed: 26
-  data_dir: '.domainbed/data/MNIST/'
+  data_dir: ${data_dir}
   input_shape: ${input_shape}
 
 datamodule:
