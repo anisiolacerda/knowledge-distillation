@@ -3,9 +3,9 @@ from typing import Any, Dict, Optional, Tuple, List
 from pytorch_lightning import LightningDataModule
 
 from . import ood_datasets
-from domainbed.lib import misc
-from domainbed import hparams_registry
-from domainbed.lib.fast_data_loader import InfiniteDataLoader, FastDataLoader
+from src.domainbed.lib import misc
+from src.domainbed import hparams_registry
+from src.domainbed.lib.fast_data_loader import InfiniteDataLoader, FastDataLoader
 
 from pytorch_lightning.trainer.supporters import CombinedLoader
 
