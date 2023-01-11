@@ -14,5 +14,5 @@ torch==1.13.0
 torchmetrics==0.9.3
 torchvision==0.14.0
 tqdm==4.62.2
-wandb==0.13.4
+wandb==0.13.8
 wilds==2.0.0
